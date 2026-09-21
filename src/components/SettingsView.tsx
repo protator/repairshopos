@@ -84,8 +84,6 @@ export const SettingsView: React.FC = () => {
     }
   };
 
-  const handleActivate = handleActivateLicense;
-
   const handleCopyHwid = () => {
     if (!licenseInfo?.hardware_id) return;
     navigator.clipboard.writeText(licenseInfo.hardware_id);
