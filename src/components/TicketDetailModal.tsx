@@ -185,20 +185,20 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
   const items = ticketData?.items || [];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-slate-925 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 bg-slate-950/70">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/80 bg-slate-950/80">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-sm font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">
+            <span className="font-mono text-xs font-black text-indigo-400 bg-indigo-500/15 px-3 py-1 rounded-lg border border-indigo-500/30 tracking-wider shadow-sm">
               {ticket?.ticket_number || 'Loading...'}
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-100 text-sm">
+              <span className="font-bold text-slate-100 text-sm tracking-tight">
                 {ticket?.device_brand} {ticket?.device_model}
               </span>
               <span className="text-xs text-slate-400 hidden sm:inline">
-                ({customer?.name})
+                • {customer?.name}
               </span>
             </div>
           </div>
@@ -207,22 +207,22 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
             <button
               type="button"
               onClick={() => setShowNotificationModal(true)}
-              className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+              className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
               title="Notify customer via WhatsApp or SMS"
             >
-              <MessageSquare className="w-3.5 h-3.5" />
+              <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden sm:inline">WhatsApp / SMS</span>
             </button>
             <button
               onClick={() => setShowInvoiceModal(true)}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700/70 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden sm:inline">{t('print')}</span>
             </button>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+              className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -230,8 +230,8 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
         </div>
 
         {/* Quick Status Progression Bar */}
-        <div className="flex items-center justify-between bg-slate-950/40 px-6 py-2 border-b border-slate-800/80 text-xs overflow-x-auto">
-          <span className="text-slate-400 font-medium whitespace-nowrap me-2">
+        <div className="flex items-center justify-between bg-slate-950/60 px-6 py-2.5 border-b border-slate-800/80 text-xs overflow-x-auto">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap me-3">
             {t('status')}:
           </span>
           <div className="flex items-center gap-1.5">
@@ -241,10 +241,10 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
               <button
                 key={st}
                 onClick={() => handleStatusChange(st)}
-                className={`px-2.5 py-1 rounded-md font-semibold transition-all whitespace-nowrap text-xs ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap text-xs ${
                   ticket?.status === st
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950 ring-1 ring-indigo-400/40'
+                    : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
                 }`}
               >
                 {t(`status_${st}` as any)}
@@ -254,12 +254,12 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center border-b border-slate-800 bg-slate-950/20 px-6 text-xs font-semibold">
+        <div className="flex items-center border-b border-slate-800 bg-slate-950/40 px-6 text-xs font-semibold">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-all ${
               activeTab === 'overview'
-                ? 'border-indigo-500 text-indigo-400'
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
