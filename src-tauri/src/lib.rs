@@ -1,4 +1,4 @@
-pub use repairshopos_core::{db, error, models};
+pub use repairshopos_core::{db, error, models, licensing};
 pub mod commands;
 
 use db::DbConnection;
@@ -46,6 +46,11 @@ pub fn run() {
             commands::adjust_inventory_stock,
             commands::get_shop_settings,
             commands::update_shop_settings,
+            commands::add_ticket_photo,
+            commands::delete_ticket_photo,
+            commands::get_license_info,
+            commands::activate_license,
+            commands::get_machine_hwid,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

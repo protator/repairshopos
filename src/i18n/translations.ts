@@ -191,6 +191,62 @@ export const translations = {
     ticket_ref: 'Ticket Ref:',
     date: 'Date:',
     warranty_notice: 'Warranty Notice: 30-day warranty on installed parts.',
+
+    // Camera & Evidence
+    camera_modal_title: 'Webcam & Microscope Photo Capture',
+    camera_select_device: 'Select Camera / Microscope',
+    camera_stage: 'Inspection Stage',
+    stage_intake: 'Intake Condition',
+    stage_microscope: 'Microscope / Board Trace',
+    stage_post_repair: 'Post-Repair Quality Check',
+    camera_notes: 'Defect Annotation / Notes',
+    camera_capture_btn: 'Capture Photo',
+    camera_retake: 'Retake',
+    camera_save: 'Attach Photo',
+    camera_fallback_upload: 'Upload Image File',
+    tab_photos: 'Photos & Evidence',
+    photos_empty: 'No photos captured for this ticket yet.',
+    snap_photo: 'Snap Photo',
+    delete_photo_confirm: 'Are you sure you want to delete this photo?',
+    intake_photos_title: 'Intake Photographic Evidence',
+    intake_photos_hint: 'Take photos of existing scratches, cracks, or liquid indicators.',
+
+    // Printing Formats & Barcode
+    format_a4: 'Standard A4 Invoice',
+    format_thermal_80mm: '80mm Thermal Receipt',
+    format_thermal_58mm: '58mm Mini Thermal Receipt',
+    billed_items: 'Billed Services & Parts',
+
+    // Operating Hours & White-Labeling
+    operating_hours: 'Operating Hours',
+    operating_hours_placeholder: 'e.g. Sat - Thu: 09:00 - 18:00',
+
+    // Hardware Specs
+    hardware_specs_title: 'Hardware Specifications',
+    hardware_specs_hint: 'Processor, RAM, storage, and graphics configuration',
+    spec_cpu: 'CPU / Processor',
+    spec_ram: 'RAM Memory',
+    spec_storage: 'Storage (SSD/HDD)',
+    spec_gpu: 'GPU / Graphics',
+    spec_os: 'Operating System',
+    spec_battery_health: 'Battery Health',
+    spec_custom: 'Additional Specs',
+
+    // Licensing System
+    licensing_title: 'Offline License & Activation',
+    licensing_desc: 'Commercial software license cryptographically bound to this hardware',
+    machine_hwid: 'Machine ID (Hardware HWID)',
+    copy_hwid: 'Copy Machine ID',
+    hwid_copied: 'Machine ID Copied!',
+    license_key_label: 'Activation Key',
+    license_key_placeholder: 'Enter vendor key (e.g. ACT-XXXX-XXXX...)',
+    activate_btn: 'Activate License',
+    activating: 'Validating Offline...',
+    licensed_status: 'Licensed (Commercial)',
+    unlicensed_status: 'Unlicensed / Evaluation',
+    dev_license_status: 'Developer License Active',
+    license_active_desc: 'Your offline commercial license is fully activated on this workstation.',
+    license_inactive_desc: 'Software is running in evaluation mode. Copy your Machine ID to request a key from your vendor.',
   },
 
   fr: {
@@ -383,6 +439,62 @@ export const translations = {
     ticket_ref: 'Réf. Ticket :',
     date: 'Date :',
     warranty_notice: 'Garantie : 30 jours sur les pièces remplacées.',
+
+    // Camera & Evidence
+    camera_modal_title: 'Capture Photo & Microscope',
+    camera_select_device: 'Choisir la caméra / Microscope',
+    camera_stage: 'Étape de la photo',
+    stage_intake: 'État Initial / Réception',
+    stage_microscope: 'Microscope / Carte Mère',
+    stage_post_repair: 'Après Réparation / Contrôle',
+    camera_notes: 'Notes / Description du défaut',
+    camera_capture_btn: 'Prendre la photo',
+    camera_retake: 'Reprendre',
+    camera_save: 'Joindre la photo',
+    camera_fallback_upload: 'Importer un fichier image',
+    tab_photos: 'Photos & Preuves',
+    photos_empty: 'Aucune photo enregistrée pour ce ticket.',
+    snap_photo: 'Prendre une photo',
+    delete_photo_confirm: 'Voulez-vous vraiment supprimer cette photo ?',
+    intake_photos_title: 'Preuves Photographiques à la Réception',
+    intake_photos_hint: 'Photographiez les rayures, fissures ou traces d\'oxydation.',
+
+    // Printing Formats & Barcode
+    format_a4: 'Facture Standard A4',
+    format_thermal_80mm: 'Ticket Thermique 80mm',
+    format_thermal_58mm: 'Ticket Thermique 58mm',
+    billed_items: 'Prestations et pièces facturées',
+
+    // Operating Hours & White-Labeling
+    operating_hours: 'Horaires d\'Ouverture',
+    operating_hours_placeholder: 'ex. Sam - Jeu: 09:00 - 18:00',
+
+    // Hardware Specs
+    hardware_specs_title: 'Spécifications Matérielles',
+    hardware_specs_hint: 'Configuration processeur, RAM, stockage et graphique',
+    spec_cpu: 'Processeur (CPU)',
+    spec_ram: 'Mémoire RAM',
+    spec_storage: 'Stockage (SSD/HDD)',
+    spec_gpu: 'Carte Graphique (GPU)',
+    spec_os: 'Système d\'Exploitation',
+    spec_battery_health: 'Santé de la Batterie',
+    spec_custom: 'Spécifications Complémentaires',
+
+    // Licensing System
+    licensing_title: 'Licence & Activation Hors-Ligne',
+    licensing_desc: 'Licence commerciale verrouillée au matériel de cette station',
+    machine_hwid: 'Identifiant Matériel (HWID)',
+    copy_hwid: 'Copier l\'ID Machine',
+    hwid_copied: 'ID Machine copié !',
+    license_key_label: 'Clé d\'Activation',
+    license_key_placeholder: 'Entrez la clé fournie (ex. ACT-XXXX-XXXX...)',
+    activate_btn: 'Activer la Licence',
+    activating: 'Validation en cours...',
+    licensed_status: 'Licence Commerciale Active',
+    unlicensed_status: 'Non Activé / Mode Évaluation',
+    dev_license_status: 'Licence Développeur Active',
+    license_active_desc: 'Votre licence hors-ligne est active et validée sur ce poste de travail.',
+    license_inactive_desc: 'Le logiciel fonctionne en mode évaluation. Copiez votre ID Machine pour obtenir une clé.',
   },
 
   ar: {
@@ -575,5 +687,61 @@ export const translations = {
     ticket_ref: 'رقم الوصل:',
     date: 'التاريخ:',
     warranty_notice: 'ملاحظة الضمان: ضمان لمدة 30 يوماً على القطع المستبدلة فقط.',
+
+    // Camera & Evidence
+    camera_modal_title: 'التقاط صور الفحص والمجهر',
+    camera_select_device: 'اختيار الكاميرا أو المجهر',
+    camera_stage: 'مرحلة التصوير',
+    stage_intake: 'حالة الجهاز عند الاستلام',
+    stage_microscope: 'فحص المجهر ومسارات البورد',
+    stage_post_repair: 'بعد الصيانة واكتمال الجهاز',
+    camera_notes: 'ملاحظات وتوضيح العطل في الصورة',
+    camera_capture_btn: 'التقاط الصورة',
+    camera_retake: 'إعادة الالتقاط',
+    camera_save: 'إرفاق الصورة بالوصل',
+    camera_fallback_upload: 'رفع ملف صورة',
+    tab_photos: 'صور الجهاز والتوثيق',
+    photos_empty: 'لا توجد صور ملتقطة لهذا الجهاز بعد.',
+    snap_photo: 'التقاط صورة',
+    delete_photo_confirm: 'هل أنت متأكد من حذف هذه الصورة؟',
+    intake_photos_title: 'توثيق حالة الجهاز بالصور عند الاستلام',
+    intake_photos_hint: 'التقط صوراً للخدوش، الكسور، أو كاشف الرطوبة لتجنب النزاعات.',
+
+    // Printing Formats & Barcode
+    format_a4: 'فاتورة قياسية A4',
+    format_thermal_80mm: 'وصل حراري 80 مم',
+    format_thermal_58mm: 'وصل حراري 58 مم',
+    billed_items: 'الخدمات وقطع الغيار المحتسبة',
+
+    // Operating Hours & White-Labeling
+    operating_hours: 'ساعات وأوقات العمل',
+    operating_hours_placeholder: 'مثال: السبت - الخميس: 09:00 - 18:00',
+
+    // Hardware Specs
+    hardware_specs_title: 'المواصفات التقنية والعتاد',
+    hardware_specs_hint: 'مواصفات المعالج، الذاكرة العشوائية، التخزين والرسوميات',
+    spec_cpu: 'المعالج (CPU)',
+    spec_ram: 'الذاكرة العشوائية (RAM)',
+    spec_storage: 'وحدة التخزين (SSD/HDD)',
+    spec_gpu: 'معالج الرسوميات (GPU)',
+    spec_os: 'نظام التشغيل',
+    spec_battery_health: 'صحة البطارية',
+    spec_custom: 'مواصفات إضافية',
+
+    // Licensing System
+    licensing_title: 'الترخيص والتفعيل بدون إنترنت',
+    licensing_desc: 'ترخيص تجاري مرتبط بالعتاد ومفعل محلياً بدون الحاجة للإنترنت',
+    machine_hwid: 'معرف الجهاز المشفر (HWID)',
+    copy_hwid: 'نسخ معرف الجهاز',
+    hwid_copied: 'تم نسخ معرف الجهاز!',
+    license_key_label: 'مفتاح التفعيل',
+    license_key_placeholder: 'أدخل مفتاح التفعيل (مثال: ACT-XXXX-XXXX...)',
+    activate_btn: 'تفعيل الترخيص',
+    activating: 'جاري التحقق محلياً...',
+    licensed_status: 'الترخيص التجاري مفعل',
+    unlicensed_status: 'غير مفعل / وضع تجريبي',
+    dev_license_status: 'ترخيص المطور مفعل',
+    license_active_desc: 'الترخيص التجاري مفعل بنجاح على جهاز العمل هذا.',
+    license_inactive_desc: 'البرنامج يعمل في وضع التقييم التجريبي. انسخ معرف الجهاز لطلب مفتاح التفعيل من المزود.',
   },
 };

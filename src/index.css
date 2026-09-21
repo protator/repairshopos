@@ -31,11 +31,23 @@
   body {
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .no-print {
     display: none !important;
   }
   .print-only {
     display: block !important;
+  }
+  
+  /* Continuous roll thermal receipts */
+  body.printing-thermal-80 {
+    width: 80mm !important;
+    max-width: 80mm !important;
+  }
+  body.printing-thermal-58 {
+    width: 58mm !important;
+    max-width: 58mm !important;
   }
 }

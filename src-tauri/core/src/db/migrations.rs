@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS tickets (
         CHECK(account_lock_status IN ('unlocked', 'locked_icloud', 'locked_frp', 'locked_bios', 'unknown')),
     problem_description TEXT NOT NULL,
     accessories_received TEXT,
+    hardware_specs TEXT NOT NULL DEFAULT '{}',
     condition_checklist TEXT NOT NULL DEFAULT '{}',
     liability_waiver_signed INTEGER NOT NULL DEFAULT 0 CHECK(liability_waiver_signed IN (0, 1)),
     intake_signature_path TEXT,
@@ -159,6 +160,9 @@ END;
 pub fn run_migrations(conn: &Connection) -> Result<(), AppError> {
     conn.execute_batch(SCHEMA_SQL)?;
 
+    // Safe migration: Add hardware_specs column if running on older DB
+    let _ = conn.execute("ALTER TABLE tickets ADD COLUMN hardware_specs TEXT NOT NULL DEFAULT '{}'", []);
+
     // Seed default settings
     let default_settings = [
         ("shop_name", "RepairShop OS"),
@@ -171,6 +175,7 @@ pub fn run_migrations(conn: &Connection) -> Result<(), AppError> {
         ("warranty_days", "30"),
         ("receipt_notes", "Thank you for trusting RepairShop OS. Warranty covers replaced parts only."),
         ("logo_path", ""),
+        ("operating_hours", "Sat - Thu: 09:00 - 18:00"),
     ];
 
     for (k, v) in default_settings.iter() {

@@ -80,6 +80,16 @@ export interface BoardDiagnostics {
   ultrasonic_cleaned: boolean;
 }
 
+export interface HardwareSpecs {
+  cpu?: string;
+  ram?: string;
+  storage?: string;
+  gpu?: string;
+  os_version?: string;
+  battery_health?: string;
+  custom_specs?: string;
+}
+
 export interface TicketKanbanCard {
   id: i64;
   ticket_number: string;
@@ -139,6 +149,7 @@ export interface TicketDetailView {
     account_lock_status: AccountLockStatus;
     problem_description: string;
     accessories_received?: string;
+    hardware_specs?: HardwareSpecs;
     condition_checklist: ConditionChecklist;
     liability_waiver_signed: boolean;
     intake_signature_path?: string;
@@ -184,6 +195,7 @@ export interface CreateTicketPayload {
   account_lock_status?: AccountLockStatus;
   problem_description: string;
   accessories_received?: string;
+  hardware_specs?: HardwareSpecs;
   condition_checklist?: ConditionChecklist;
   liability_waiver_signed?: boolean;
   repair_type?: RepairType;
@@ -264,4 +276,14 @@ export interface ShopSettings {
   warranty_days: i64;
   receipt_notes: string;
   logo_path?: string;
+  operating_hours: string;
+}
+
+export interface LicenseInfo {
+  hardware_id: string;
+  is_licensed: boolean;
+  license_key?: string;
+  license_type: string;
+  activated_at?: string;
+  message: string;
 }

@@ -69,3 +69,26 @@ pub async fn search_tickets(
 ) -> Result<Vec<TicketKanbanCard>, AppError> {
     state.with_conn(|conn| ticket_repo::search_tickets(conn, &query))
 }
+
+#[tauri::command]
+pub async fn add_ticket_photo(
+    state: State<'_, DbConnection>,
+    ticket_id: i64,
+    stage: String,
+    file_path: String,
+    notes: Option<String>,
+) -> Result<TicketPhoto, AppError> {
+    let photo_stage = PhotoStage::from_str_opt(&stage);
+    state.with_conn(|conn| {
+        ticket_repo::add_ticket_photo(conn, ticket_id, photo_stage, &file_path, notes.as_deref())
+    })
+}
+
+#[tauri::command]
+pub async fn delete_ticket_photo(
+    state: State<'_, DbConnection>,
+    photo_id: i64,
+) -> Result<(), AppError> {
+    state.with_conn(|conn| ticket_repo::delete_ticket_photo(conn, photo_id))
+}
+

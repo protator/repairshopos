@@ -35,13 +35,16 @@ fn map_ticket_row(row: &Row) -> Result<Ticket, rusqlite::Error> {
     let dev_type_str: String = row.get(6)?;
     let lock_type_str: String = row.get(12)?;
     let acct_lock_str: String = row.get(15)?;
-    let checklist_str: String = row.get(18)?;
-    let waiver_int: i64 = row.get(19)?;
-    let repair_type_str: String = row.get(21)?;
-    let board_diag_str: String = row.get(24)?;
-    let pay_status_str: String = row.get(33)?;
-    let pay_method_opt: Option<String> = row.get(34)?;
+    let hw_specs_str: String = row.get(18).unwrap_or_else(|_| "{}".to_string());
+    let checklist_str: String = row.get(19)?;
+    let waiver_int: i64 = row.get(20)?;
+    let repair_type_str: String = row.get(22)?;
+    let board_diag_str: String = row.get(25)?;
+    let pay_status_str: String = row.get(34)?;
+    let pay_method_opt: Option<String> = row.get(35)?;
 
+    let hardware_specs: HardwareSpecs = serde_json::from_str(&hw_specs_str)
+        .unwrap_or_default();
     let condition_checklist: ConditionChecklist = serde_json::from_str(&checklist_str)
         .unwrap_or_default();
     let board_diagnostics: BoardDiagnostics = serde_json::from_str(&board_diag_str)
@@ -66,29 +69,30 @@ fn map_ticket_row(row: &Row) -> Result<Ticket, rusqlite::Error> {
         account_lock_status: AccountLockStatus::from_str_opt(&acct_lock_str),
         problem_description: row.get(16)?,
         accessories_received: row.get(17)?,
+        hardware_specs,
         condition_checklist,
         liability_waiver_signed: waiver_int != 0,
-        intake_signature_path: row.get(20)?,
+        intake_signature_path: row.get(21)?,
         repair_type: RepairType::from_str_opt(&repair_type_str),
-        diagnostics_notes: row.get(22)?,
-        technician_notes: row.get(23)?,
+        diagnostics_notes: row.get(23)?,
+        technician_notes: row.get(24)?,
         board_diagnostics,
-        estimated_cost: row.get(25)?,
-        subtotal_parts: row.get(26)?,
-        subtotal_labor: row.get(27)?,
-        discount_amount: row.get(28)?,
-        tax_rate_bps: row.get(29)?,
-        tax_amount: row.get(30)?,
-        total_price: row.get(31)?,
-        deposit_paid: row.get(32)?,
+        estimated_cost: row.get(26)?,
+        subtotal_parts: row.get(27)?,
+        subtotal_labor: row.get(28)?,
+        discount_amount: row.get(29)?,
+        tax_rate_bps: row.get(30)?,
+        tax_amount: row.get(31)?,
+        total_price: row.get(32)?,
+        deposit_paid: row.get(33)?,
         payment_status: PaymentStatus::from_str_opt(&pay_status_str),
         payment_method: pay_method_opt.as_deref().and_then(PaymentMethod::from_str_opt),
-        warranty_days: row.get(35)?,
-        warranty_expiry_date: row.get(36)?,
-        created_at: row.get(37)?,
-        updated_at: row.get(38)?,
-        ready_at: row.get(39)?,
-        completed_at: row.get(40)?,
+        warranty_days: row.get(36)?,
+        warranty_expiry_date: row.get(37)?,
+        created_at: row.get(38)?,
+        updated_at: row.get(39)?,
+        ready_at: row.get(40)?,
+        completed_at: row.get(41)?,
     })
 }
 
@@ -109,6 +113,7 @@ pub fn create_ticket(conn: &Connection, payload: CreateTicketPayload) -> Result<
     let repair_type = payload.repair_type.unwrap_or_default();
     let waiver = if payload.liability_waiver_signed.unwrap_or(false) { 1 } else { 0 };
 
+    let hw_specs_json = serde_json::to_string(&payload.hardware_specs.unwrap_or_default())?;
     let checklist_json = serde_json::to_string(&payload.condition_checklist.unwrap_or_default())?;
     let board_diag_json = serde_json::to_string(&payload.board_diagnostics.unwrap_or_default())?;
 
@@ -118,11 +123,11 @@ pub fn create_ticket(conn: &Connection, payload: CreateTicketPayload) -> Result<
             ticket_number, customer_id, priority, is_quote, device_type, device_brand,
             device_model, device_color, imei, serial_number, lock_type, passcode,
             pattern_code, account_lock_status, problem_description, accessories_received,
-            condition_checklist, liability_waiver_signed, repair_type, diagnostics_notes,
-            board_diagnostics, estimated_cost, deposit_paid
+            hardware_specs, condition_checklist, liability_waiver_signed, repair_type,
+            diagnostics_notes, board_diagnostics, estimated_cost, deposit_paid
         ) VALUES (
             ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
-            ?17, ?18, ?19, ?20, ?21, ?22, ?23
+            ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24
         )
         "#,
         params![
@@ -142,6 +147,7 @@ pub fn create_ticket(conn: &Connection, payload: CreateTicketPayload) -> Result<
             account_lock.as_str(),
             payload.problem_description,
             payload.accessories_received,
+            hw_specs_json,
             checklist_json,
             waiver,
             repair_type.as_str(),
@@ -162,7 +168,7 @@ pub fn get_ticket_by_id(conn: &Connection, id: i64) -> Result<Ticket, AppError> 
         SELECT id, ticket_number, customer_id, status, priority, is_quote, device_type,
                device_brand, device_model, device_color, imei, serial_number, lock_type,
                passcode, pattern_code, account_lock_status, problem_description,
-               accessories_received, condition_checklist, liability_waiver_signed,
+               accessories_received, hardware_specs, condition_checklist, liability_waiver_signed,
                intake_signature_path, repair_type, diagnostics_notes, technician_notes,
                board_diagnostics, estimated_cost, subtotal_parts, subtotal_labor,
                discount_amount, tax_rate_bps, tax_amount, total_price, deposit_paid,
@@ -492,3 +498,57 @@ pub fn get_ticket_detail_view(conn: &Connection, ticket_id: i64) -> Result<Ticke
         photos,
     })
 }
+
+pub fn add_ticket_photo(
+    conn: &Connection,
+    ticket_id: i64,
+    stage: PhotoStage,
+    file_path: &str,
+    notes: Option<&str>,
+) -> Result<TicketPhoto, AppError> {
+    let _ = get_ticket_by_id(conn, ticket_id)?;
+
+    conn.execute(
+        r#"
+        INSERT INTO ticket_photos (ticket_id, stage, file_path, notes)
+        VALUES (?1, ?2, ?3, ?4)
+        "#,
+        params![ticket_id, stage.as_str(), file_path, notes],
+    )?;
+
+    let id = conn.last_insert_rowid();
+    get_ticket_photo_by_id(conn, id)
+}
+
+pub fn get_ticket_photo_by_id(conn: &Connection, id: i64) -> Result<TicketPhoto, AppError> {
+    let mut stmt = conn.prepare(
+        "SELECT id, ticket_id, stage, file_path, thumbnail_path, notes, created_at FROM ticket_photos WHERE id = ?1",
+    )?;
+
+    let photo = stmt.query_row(params![id], |row| {
+        let stage_str: String = row.get(2)?;
+        Ok(TicketPhoto {
+            id: row.get(0)?,
+            ticket_id: row.get(1)?,
+            stage: PhotoStage::from_str_opt(&stage_str),
+            file_path: row.get(3)?,
+            thumbnail_path: row.get(4)?,
+            notes: row.get(5)?,
+            created_at: row.get(6)?,
+        })
+    }).map_err(|e| match e {
+        rusqlite::Error::QueryReturnedNoRows => AppError::NotFound(format!("Ticket photo {} not found", id)),
+        other => AppError::Database(other),
+    })?;
+
+    Ok(photo)
+}
+
+pub fn delete_ticket_photo(conn: &Connection, photo_id: i64) -> Result<(), AppError> {
+    let rows = conn.execute("DELETE FROM ticket_photos WHERE id = ?1", params![photo_id])?;
+    if rows == 0 {
+        return Err(AppError::NotFound(format!("Ticket photo {} not found", photo_id)));
+    }
+    Ok(())
+}
+

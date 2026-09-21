@@ -386,6 +386,17 @@ pub struct BoardDiagnostics {
     pub ultrasonic_cleaned: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+pub struct HardwareSpecs {
+    pub cpu: Option<String>,
+    pub ram: Option<String>,
+    pub storage: Option<String>,
+    pub gpu: Option<String>,
+    pub os_version: Option<String>,
+    pub battery_health: Option<String>,
+    pub custom_specs: Option<String>,
+}
+
 // --- Ticket Entities ---
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -412,6 +423,7 @@ pub struct Ticket {
 
     pub problem_description: String,
     pub accessories_received: Option<String>,
+    pub hardware_specs: HardwareSpecs,
     pub condition_checklist: ConditionChecklist,
     pub liability_waiver_signed: bool,
     pub intake_signature_path: Option<String>,
@@ -486,6 +498,7 @@ pub struct CreateTicketPayload {
 
     pub problem_description: String,
     pub accessories_received: Option<String>,
+    pub hardware_specs: Option<HardwareSpecs>,
     pub condition_checklist: Option<ConditionChecklist>,
     pub liability_waiver_signed: Option<bool>,
 

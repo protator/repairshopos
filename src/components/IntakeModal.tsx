@@ -5,6 +5,8 @@ import {
   UserPlus,
   Search,
   CheckCircle2,
+  Camera,
+  Trash2,
 } from 'lucide-react';
 import {
   Customer,
@@ -19,6 +21,7 @@ import {
 } from '../types';
 import { api } from '../services/api';
 import { useI18n } from '../i18n/I18nContext';
+import { CameraCaptureModal, PhotoStage } from './CameraCaptureModal';
 
 interface IntakeModalProps {
   isOpen: boolean;
@@ -32,6 +35,10 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
   onTicketCreated,
 }) => {
   const { t } = useI18n();
+
+  // Intake Photos State
+  const [stagedPhotos, setStagedPhotos] = useState<{ stage: PhotoStage; dataUrl: string; notes?: string }[]>([]);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   // Step tabs
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -181,6 +188,16 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
       };
 
       const result = await api.createTicket(payload);
+
+      // Attach any photos taken during intake
+      for (const p of stagedPhotos) {
+        try {
+          await api.addTicketPhoto(result.ticket.id, p.stage, p.dataUrl, p.notes);
+        } catch (photoErr) {
+          console.error('Failed to attach intake photo:', photoErr);
+        }
+      }
+
       onTicketCreated(result.ticket.id);
       onClose();
     } catch (err: any) {
@@ -573,6 +590,62 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
                   );
                 })}
               </div>
+
+              {/* Photographic Evidence Section */}
+              <div className="pt-4 border-t border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>{t('intake_photos_title' as any) || 'Intake Photographic Evidence'}</span>
+                      {stagedPhotos.length > 0 && (
+                        <span className="font-mono text-indigo-400">({stagedPhotos.length})</span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      {t('intake_photos_hint' as any) || 'Document pre-existing screen cracks, housing scratches, or liquid indicators.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCameraModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow transition-all active:scale-95"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{t('snap_photo' as any) || 'Snap Photo'}</span>
+                  </button>
+                </div>
+
+                {stagedPhotos.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                    {stagedPhotos.map((p, idx) => (
+                      <div
+                        key={idx}
+                        className="relative aspect-video bg-black rounded-lg overflow-hidden border border-slate-800 group"
+                      >
+                        <img
+                          src={p.dataUrl}
+                          alt="Intake evidence"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setStagedPhotos((prev) => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-rose-600 text-white rounded-md transition-colors"
+                          title="Remove photo"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                        {p.notes && (
+                          <div className="absolute bottom-0 inset-x-0 bg-black/70 p-1 text-[9px] text-slate-200 truncate">
+                            {p.notes}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -718,6 +791,14 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Camera Capture Modal */}
+      <CameraCaptureModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={(photo) => setStagedPhotos((prev) => [...prev, photo])}
+        defaultStage="intake"
+      />
     </div>
   );
 };

@@ -35,6 +35,7 @@ pub fn get_settings(conn: &Connection) -> Result<ShopSettings, AppError> {
             "logo_path" => {
                 settings.logo_path = if value.is_empty() { None } else { Some(value) };
             }
+            "operating_hours" => settings.operating_hours = value,
             _ => {}
         }
     }
@@ -52,6 +53,7 @@ pub fn update_settings(conn: &Connection, settings: &ShopSettings) -> Result<Sho
         ("language", settings.language.as_str()),
         ("receipt_notes", settings.receipt_notes.as_str()),
         ("logo_path", settings.logo_path.as_deref().unwrap_or("")),
+        ("operating_hours", settings.operating_hours.as_str()),
     ];
 
     for (k, v) in entries.iter() {

@@ -5,8 +5,14 @@ import {
   Globe,
   Building,
   CheckCircle2,
+  Key,
+  ShieldCheck,
+  ShieldAlert,
+  Copy,
+  Check,
+  Clock,
 } from 'lucide-react';
-import { ShopSettings } from '../types';
+import { ShopSettings, LicenseInfo } from '../types';
 import { api } from '../services/api';
 import { useI18n } from '../i18n/I18nContext';
 import { Language } from '../i18n/translations';
@@ -25,13 +31,22 @@ export const SettingsView: React.FC = () => {
     warranty_days: 30,
     receipt_notes: 'Warranty applies on parts installed by the lab.',
     logo_path: '',
+    operating_hours: 'Sat - Thu: 09:00 - 18:00',
   });
 
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 
+  // Licensing state
+  const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
+  const [licenseKeyInput, setLicenseKeyInput] = useState('');
+  const [activating, setActivating] = useState(false);
+  const [licenseFeedback, setLicenseFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [copiedHwid, setCopiedHwid] = useState(false);
+
   useEffect(() => {
     loadSettings();
+    loadLicense();
   }, []);
 
   const loadSettings = async () => {

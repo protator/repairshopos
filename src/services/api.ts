@@ -9,10 +9,12 @@ import {
   TicketStatus,
   AddItemPayload,
   TicketItem,
+  TicketPhoto,
   InventoryItem,
   CreateInventoryPayload,
   UpdateInventoryPayload,
   ShopSettings,
+  LicenseInfo,
 } from '../types';
 
 const isTauri = typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
@@ -186,6 +188,7 @@ let mockSettings: ShopSettings = {
   warranty_days: 30,
   receipt_notes: 'Thank you for choosing RepairShop OS! 30-day warranty applies on parts replaced. Liquid damage voids warranty.',
   logo_path: '',
+  operating_hours: 'Sat - Thu: 09:00 - 18:00',
 };
 
 let mockTicketDetails: Record<number, TicketDetailView> = {
@@ -436,6 +439,7 @@ export const api = {
         account_lock_status: payload.account_lock_status || 'unknown',
         problem_description: payload.problem_description,
         accessories_received: payload.accessories_received,
+        hardware_specs: payload.hardware_specs || {},
         condition_checklist: payload.condition_checklist || {
           power_on: true,
           screen_cracked: false,
@@ -521,6 +525,29 @@ export const api = {
     }
   },
 
+  async addTicketPhoto(ticketId: number, stage: string, filePath: string, notes?: string): Promise<TicketPhoto> {
+    if (isTauri) return invoke('add_ticket_photo', { ticketId, stage, filePath, notes });
+    const photo: TicketPhoto = {
+      id: Date.now(),
+      ticket_id: ticketId,
+      stage: stage as any,
+      file_path: filePath,
+      notes,
+      created_at: new Date().toISOString(),
+    };
+    if (mockTicketDetails[ticketId]) {
+      mockTicketDetails[ticketId].photos.push(photo);
+    }
+    return photo;
+  },
+
+  async deleteTicketPhoto(photoId: number, ticketId: number): Promise<void> {
+    if (isTauri) return invoke('delete_ticket_photo', { photoId });
+    if (mockTicketDetails[ticketId]) {
+      mockTicketDetails[ticketId].photos = mockTicketDetails[ticketId].photos.filter(p => p.id !== photoId);
+    }
+  },
+
   // Inventory
   async listInventory(search?: string, category?: string, lowStockOnly?: boolean): Promise<InventoryItem[]> {
     if (isTauri) return invoke('list_inventory_items', { search, category, lowStockOnly });
@@ -598,4 +625,40 @@ export const api = {
     mockSettings = { ...settings };
     return { ...mockSettings };
   },
+
+  // Licensing
+  async getLicenseInfo(): Promise<LicenseInfo> {
+    if (isTauri) return invoke('get_license_info');
+    return { ...mockLicenseInfo };
+  },
+
+  async activateLicense(key: string): Promise<LicenseInfo> {
+    if (isTauri) return invoke('activate_license', { key });
+    const cleanKey = key.trim().toUpperCase();
+    if (cleanKey === 'RSOS-DEV-MASTER-2026-DZ' || cleanKey.startsWith('ACT-')) {
+      mockLicenseInfo = {
+        ...mockLicenseInfo,
+        is_licensed: true,
+        license_key: cleanKey,
+        license_type: cleanKey === 'RSOS-DEV-MASTER-2026-DZ' ? 'developer' : 'commercial',
+        activated_at: new Date().toISOString(),
+        message: 'Offline Commercial License Active',
+      };
+      return { ...mockLicenseInfo };
+    }
+    throw new Error(`Invalid activation key for Machine ID: ${mockLicenseInfo.hardware_id}`);
+  },
+
+  async getMachineHwid(): Promise<string> {
+    if (isTauri) return invoke('get_machine_hwid');
+    return mockLicenseInfo.hardware_id;
+  },
+};
+
+let mockLicenseInfo: LicenseInfo = {
+  hardware_id: 'RSOS-7F3A-8B2C-1E4D',
+  is_licensed: false,
+  license_key: undefined,
+  license_type: 'unlicensed',
+  message: 'No active license key. Please activate with your vendor key.',
 };

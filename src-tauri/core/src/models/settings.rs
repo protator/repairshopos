@@ -12,6 +12,7 @@ pub struct ShopSettings {
     pub warranty_days: i64,
     pub receipt_notes: String,
     pub logo_path: Option<String>,
+    pub operating_hours: String,
 }
 
 impl Default for ShopSettings {
@@ -27,6 +28,7 @@ impl Default for ShopSettings {
             warranty_days: 30,
             receipt_notes: "Thank you for choosing us! Warranty covers serviced parts only.".to_string(),
             logo_path: None,
+            operating_hours: "Sat - Thu: 09:00 - 18:00".to_string(),
         }
     }
 }

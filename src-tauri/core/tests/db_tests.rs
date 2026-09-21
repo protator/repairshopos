@@ -95,6 +95,15 @@ fn test_ticket_lifecycle_and_calculations() {
                 account_lock_status: Some(AccountLockStatus::Unlocked),
                 problem_description: "No power, device gets hot near charging port".to_string(),
                 accessories_received: Some("Case and original box".to_string()),
+                hardware_specs: Some(HardwareSpecs {
+                    cpu: Some("Apple A15 Bionic".to_string()),
+                    ram: Some("6GB".to_string()),
+                    storage: Some("256GB".to_string()),
+                    gpu: None,
+                    os_version: Some("iOS 17.4".to_string()),
+                    battery_health: Some("88%".to_string()),
+                    custom_specs: None,
+                }),
                 condition_checklist: Some(ConditionChecklist {
                     power_on: false,
                     screen_cracked: false,
@@ -137,6 +146,8 @@ fn test_ticket_lifecycle_and_calculations() {
     assert_eq!(ticket.repair_type, RepairType::BoardLevel);
     assert_eq!(ticket.board_diagnostics.power_rails.len(), 1);
     assert!(ticket.board_diagnostics.power_rails[0].is_shorted);
+    assert_eq!(ticket.hardware_specs.cpu.as_deref(), Some("Apple A15 Bionic"));
+    assert_eq!(ticket.hardware_specs.ram.as_deref(), Some("6GB"));
 
     // 3. Add Line Items (Parts & Labor)
     let item_part = db.with_conn(|conn| {
@@ -229,6 +240,7 @@ fn test_inventory_and_settings() {
     assert_eq!(default_settings.shop_name, "RepairShop OS");
     assert_eq!(default_settings.currency, "DZD");
     assert_eq!(default_settings.tax_rate_bps, 1900);
+    assert_eq!(default_settings.operating_hours, "Sat - Thu: 09:00 - 18:00");
 
     // 2. Update settings
     let updated_settings = db.with_conn(|conn| {
@@ -243,11 +255,13 @@ fn test_inventory_and_settings() {
             warranty_days: 60,
             receipt_notes: "Special warranty terms apply.".to_string(),
             logo_path: Some("/path/to/logo.png".to_string()),
+            operating_hours: "Sat - Wed: 08:30 - 17:30".to_string(),
         })
     }).expect("Failed to update settings");
     assert_eq!(updated_settings.shop_name, "Fairak Tech Repair");
     assert_eq!(updated_settings.language, "ar");
     assert_eq!(updated_settings.warranty_days, 60);
+    assert_eq!(updated_settings.operating_hours, "Sat - Wed: 08:30 - 17:30");
 
     // 3. Create Inventory Part
     let part = db.with_conn(|conn| {
@@ -304,6 +318,7 @@ fn test_inventory_and_settings() {
             account_lock_status: None,
             problem_description: "Broken screen".to_string(),
             accessories_received: None,
+            hardware_specs: None,
             condition_checklist: None,
             liability_waiver_signed: None,
             repair_type: None,
@@ -341,4 +356,48 @@ fn test_inventory_and_settings() {
     }).expect("Failed to get part");
     assert_eq!(part_after_delete.quantity, 2);
 }
+
+#[test]
+fn test_offline_licensing_lifecycle() {
+    let db = DbConnection::new_in_memory().expect("Failed to create in-memory DB");
+
+    // 1. Initial State: should be unlicensed
+    let info = db.with_conn(repairshopos_core::licensing::get_license_info)
+        .expect("Failed to get license info");
+    assert!(!info.is_licensed);
+    assert_eq!(info.license_type, "unlicensed");
+    assert!(info.hardware_id.starts_with("RSOS-"));
+
+    // 2. Attempt invalid key activation
+    let fail_result = db.with_conn(|conn| {
+        repairshopos_core::licensing::activate_license(conn, "INVALID-KEY-1234")
+    });
+    assert!(fail_result.is_err());
+
+    // 3. Generate correct key for this machine's HWID
+    let valid_key = repairshopos_core::licensing::generate_license_key(&info.hardware_id);
+
+    // 4. Activate with valid offline key
+    let activated = db.with_conn(|conn| {
+        repairshopos_core::licensing::activate_license(conn, &valid_key)
+    }).expect("Failed to activate valid key");
+
+    assert!(activated.is_licensed);
+    assert_eq!(activated.license_type, "commercial");
+    assert_eq!(activated.license_key.as_deref(), Some(valid_key.as_str()));
+
+    // 5. Subsequent get_license_info returns active
+    let verified = db.with_conn(repairshopos_core::licensing::get_license_info)
+        .expect("Failed to query license info");
+    assert!(verified.is_licensed);
+    assert_eq!(verified.license_type, "commercial");
+
+    // 6. Test master dev key
+    let dev_activated = db.with_conn(|conn| {
+        repairshopos_core::licensing::activate_license(conn, "RSOS-DEV-MASTER-2026-DZ")
+    }).expect("Failed to activate dev key");
+    assert!(dev_activated.is_licensed);
+    assert_eq!(dev_activated.license_type, "developer");
+}
+
 

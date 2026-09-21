@@ -2716,12 +2716,25 @@ name = "repairshopos"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "repairshopos-core",
  "rusqlite",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
+ "thiserror 2.0.20",
+]
+
+[[package]]
+name = "repairshopos-core"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2",
  "thiserror 2.0.20",
 ]
 

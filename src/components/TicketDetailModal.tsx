@@ -8,10 +8,13 @@ import {
   Wrench,
   Cpu,
   Receipt,
+  Camera,
+  ZoomIn,
 } from 'lucide-react';
 import {
   TicketDetailView,
   TicketStatus,
+  TicketPhoto,
   ItemType,
   InventoryItem,
   AddItemPayload,
@@ -19,6 +22,7 @@ import {
 import { api } from '../services/api';
 import { useI18n } from '../i18n/I18nContext';
 import { InvoiceModal } from './InvoiceModal';
+import { CameraCaptureModal, PhotoStage } from './CameraCaptureModal';
 
 interface TicketDetailModalProps {
   ticketId: number | null;
@@ -33,9 +37,13 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
 }) => {
   const { t, formatCurrency } = useI18n();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'tech' | 'billing' | 'invoice'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tech' | 'billing' | 'photos'>('overview');
   const [ticketData, setTicketData] = useState<TicketDetailView | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Camera & Photo State
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [selectedPhotoLightbox, setSelectedPhotoLightbox] = useState<TicketPhoto | null>(null);
 
   // Billing Form State
   const [inventoryList, setInventoryList] = useState<InventoryItem[]>([]);
@@ -144,6 +152,27 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
     }
   };
 
+  const handlePhotoCaptured = async (data: { stage: PhotoStage; dataUrl: string; notes?: string }) => {
+    if (!ticketId) return;
+    try {
+      await api.addTicketPhoto(ticketId, data.stage, data.dataUrl, data.notes);
+      loadTicket();
+    } catch (e: any) {
+      alert(e?.message || 'Failed to save photo');
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!ticketId) return;
+    if (!confirm(t('delete_photo_confirm' as any) || 'Delete this photo?')) return;
+    try {
+      await api.deleteTicketPhoto(photoId, ticketId);
+      loadTicket();
+    } catch (e: any) {
+      alert(e?.message || 'Failed to delete photo');
+    }
+  };
+
   if (!ticketId) return null;
 
   const ticket = ticketData?.ticket;
@@ -247,6 +276,20 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
             <Receipt className="w-3.5 h-3.5" />
             <span>
               {t('tab_billing')} ({items.length})
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('photos')}
+            className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-all ${
+              activeTab === 'photos'
+                ? 'border-indigo-500 text-indigo-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span>
+              {t('tab_photos' as any)} ({ticketData?.photos?.length || 0})
             </span>
           </button>
         </div>
@@ -627,10 +670,174 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* TAB 4: PHOTOS & EVIDENCE */}
+              {activeTab === 'photos' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                    <div>
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-indigo-400" />
+                        <span>{t('tab_photos' as any)}</span>
+                        <span className="text-xs font-normal text-slate-400 font-mono">
+                          ({ticketData.photos?.length || 0})
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Intake liability, microscope trace defects, and post-repair quality assurance.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCameraModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow transition-all active:scale-95"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{t('snap_photo' as any) || 'Snap Photo'}</span>
+                    </button>
+                  </div>
+
+                  {/* Photo Cards Grid */}
+                  {!ticketData.photos || ticketData.photos.length === 0 ? (
+                    <div className="text-center py-12 border border-dashed border-slate-800 rounded-xl space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mx-auto text-slate-500">
+                        <Camera className="w-6 h-6" />
+                      </div>
+                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        {t('photos_empty' as any) || 'No photos captured for this ticket yet.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowCameraModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>{t('snap_photo' as any) || 'Capture First Photo'}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {ticketData.photos.map((photo) => {
+                        const stageBadge =
+                          photo.stage === 'intake'
+                            ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                            : photo.stage === 'microscope_diagnostic'
+                            ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+
+                        const stageLabel =
+                          photo.stage === 'intake'
+                            ? t('stage_intake' as any)
+                            : photo.stage === 'microscope_diagnostic'
+                            ? t('stage_microscope' as any)
+                            : t('stage_post_repair' as any);
+
+                        return (
+                          <div
+                            key={photo.id}
+                            className="bg-slate-950/80 border border-slate-800 rounded-xl overflow-hidden flex flex-col group hover:border-slate-700 transition-all"
+                          >
+                            {/* Image Preview / Lightbox Trigger */}
+                            <div
+                              onClick={() => setSelectedPhotoLightbox(photo)}
+                              className="relative aspect-video bg-black cursor-pointer overflow-hidden flex items-center justify-center group"
+                            >
+                              <img
+                                src={photo.file_path}
+                                alt={photo.notes || 'Ticket photo'}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-white text-xs font-semibold">
+                                <ZoomIn className="w-4 h-4" />
+                                <span>View Full</span>
+                              </div>
+                              <span
+                                className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md ${stageBadge}`}
+                              >
+                                {stageLabel}
+                              </span>
+                            </div>
+
+                            {/* Info & Notes */}
+                            <div className="p-3 flex-1 flex flex-col justify-between space-y-2 text-xs">
+                              {photo.notes ? (
+                                <p className="text-slate-300 line-clamp-2 italic">
+                                  "{photo.notes}"
+                                </p>
+                              ) : (
+                                <p className="text-slate-600 italic">No notes added</p>
+                              )}
+
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px] text-slate-500">
+                                <span>
+                                  {new Date(photo.created_at).toLocaleDateString()}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePhoto(photo.id);
+                                  }}
+                                  className="text-slate-500 hover:text-rose-400 p-1 rounded transition-colors"
+                                  title="Delete photo"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedPhotoLightbox && (
+        <div
+          onClick={() => setSelectedPhotoLightbox(null)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-4xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950">
+              <span className="text-xs font-semibold text-slate-300">
+                {selectedPhotoLightbox.notes || 'Photo Preview'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedPhotoLightbox(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto bg-black flex items-center justify-center p-2">
+              <img
+                src={selectedPhotoLightbox.file_path}
+                alt="Enlarged"
+                className="max-h-[75vh] w-auto object-contain rounded"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Camera Capture Modal */}
+      <CameraCaptureModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={handlePhotoCaptured}
+        defaultStage="microscope_diagnostic"
+      />
 
       {/* Printable Invoice Modal */}
       {showInvoiceModal && ticketData && (
