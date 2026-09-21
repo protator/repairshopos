@@ -10,6 +10,7 @@ import {
   Receipt,
   Camera,
   ZoomIn,
+  MessageSquare,
 } from 'lucide-react';
 import {
   TicketDetailView,
@@ -23,6 +24,7 @@ import { api } from '../services/api';
 import { useI18n } from '../i18n/I18nContext';
 import { InvoiceModal } from './InvoiceModal';
 import { CameraCaptureModal, PhotoStage } from './CameraCaptureModal';
+import { CustomerNotificationModal } from './CustomerNotificationModal';
 
 interface TicketDetailModalProps {
   ticketId: number | null;
@@ -56,6 +58,9 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
 
   // Show dedicated invoice print popup
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+
+  // Show dedicated customer notification popup
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   useEffect(() => {
     if (ticketId) {
@@ -199,6 +204,15 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowNotificationModal(true)}
+              className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+              title="Notify customer via WhatsApp or SMS"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">WhatsApp / SMS</span>
+            </button>
             <button
               onClick={() => setShowInvoiceModal(true)}
               className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
@@ -891,6 +905,15 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
         <InvoiceModal
           ticketData={ticketData}
           onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
+
+      {/* Customer WhatsApp / SMS Notification Modal */}
+      {showNotificationModal && ticketData && (
+        <CustomerNotificationModal
+          isOpen={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+          ticketData={ticketData}
         />
       )}
     </div>

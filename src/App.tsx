@@ -9,6 +9,8 @@ import { InventoryView } from './components/InventoryView';
 import { SettingsView } from './components/SettingsView';
 import { TicketKanbanCard, TicketStatus } from './types';
 import { api } from './services/api';
+import { useBarcodeScanner } from './hooks/useBarcodeScanner';
+import { ScanBarcode } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<'dashboard' | 'customers' | 'inventory' | 'settings'>('dashboard');
@@ -16,6 +18,33 @@ const AppContent: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [scanToast, setScanToast] = useState<{ message: string; success: boolean; code: string } | null>(null);
+
+  // Hardware Barcode Scanner Listener
+  useBarcodeScanner({
+    onScan: async (scannedCode) => {
+      try {
+        const results = await api.searchTickets(scannedCode);
+        if (results && results.length > 0) {
+          setSelectedTicketId(results[0].id);
+          setScanToast({
+            message: `Ticket ${results[0].ticket_number} opened (${results[0].device_brand} ${results[0].device_model})`,
+            code: scannedCode,
+            success: true,
+          });
+        } else {
+          setScanToast({
+            message: `No ticket found matching scanned code`,
+            code: scannedCode,
+            success: false,
+          });
+        }
+      } catch (err) {
+        console.error('Barcode lookup error:', err);
+      }
+      setTimeout(() => setScanToast(null), 4000);
+    },
+  });
 
   const loadTickets = useCallback(async () => {
     try {
@@ -112,6 +141,28 @@ const AppContent: React.FC = () => {
           onClose={() => setSelectedTicketId(null)}
           onRefresh={loadTickets}
         />
+      )}
+
+      {/* Laser Barcode Scanner HUD Toast */}
+      {scanToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 border border-slate-700 shadow-2xl p-3.5 rounded-2xl animate-fade-in text-xs max-w-md">
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              scanToast.success
+                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+            }`}
+          >
+            <ScanBarcode className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 font-mono font-bold text-slate-200">
+              <span>SCANNER:</span>
+              <span className="text-indigo-400">{scanToast.code}</span>
+            </div>
+            <p className="text-slate-400 text-[11px] mt-0.5">{scanToast.message}</p>
+          </div>
+        </div>
       )}
     </div>
   );
