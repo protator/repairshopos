@@ -143,6 +143,9 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               {settings?.shop_email && (
                 <p className="text-[10px] text-slate-500">{settings.shop_email}</p>
               )}
+              {settings?.operating_hours && (
+                <p className="text-[10px] text-slate-500 font-sans">{settings.operating_hours}</p>
+              )}
             </div>
 
             <div className="border-t border-dashed border-slate-400 my-2" />
@@ -305,6 +308,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   Tel: {settings?.shop_phone || '+213 555 123 456'}
                   {settings?.shop_email && ` | Email: ${settings.shop_email}`}
                 </p>
+                {settings?.operating_hours && (
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    Hours: {settings.operating_hours}
+                  </p>
+                )}
               </div>
 
               <div className="text-right flex flex-col items-end">
@@ -348,6 +356,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 <p className="font-bold text-sm text-slate-900">
                   {ticket.device_brand} {ticket.device_model}
                 </p>
+                {ticket.hardware_specs && (ticket.hardware_specs.cpu || ticket.hardware_specs.ram || ticket.hardware_specs.storage) && (
+                  <p className="text-[11px] text-indigo-700 font-medium">
+                    {[ticket.hardware_specs.cpu, ticket.hardware_specs.ram, ticket.hardware_specs.storage].filter(Boolean).join(' • ')}
+                  </p>
+                )}
                 {ticket.imei && (
                   <p className="font-mono text-slate-600">IMEI: {ticket.imei}</p>
                 )}

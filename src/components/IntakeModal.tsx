@@ -18,6 +18,7 @@ import {
   TicketPriority,
   AccountLockStatus,
   ConditionChecklist,
+  HardwareSpecs,
 } from '../types';
 import { api } from '../services/api';
 import { useI18n } from '../i18n/I18nContext';
@@ -64,6 +65,17 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
   const [deviceColor, setDeviceColor] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [imei, setImei] = useState('');
+
+  // Structured Hardware Specs (PRD §4.1)
+  const [hardwareSpecs, setHardwareSpecs] = useState<HardwareSpecs>({
+    cpu: '',
+    ram: '',
+    storage: '',
+    gpu: '',
+    os_version: '',
+    battery_health: '',
+    custom_specs: '',
+  });
 
   // Lock state
   const [lockType, setLockType] = useState<LockType>('pin');
@@ -180,6 +192,7 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
         condition_checklist: checklist,
         problem_description: problemDescription,
         accessories_received: accessoriesReceived || undefined,
+        hardware_specs: hardwareSpecs,
         repair_type: repairType,
         priority,
         estimated_cost: estimatedCost,
@@ -488,6 +501,77 @@ export const IntakeModal: React.FC<IntakeModalProps> = ({
                   placeholder="Device Serial"
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 font-mono uppercase"
                 />
+              </div>
+
+              {/* Structured Hardware Specs (PRD §4.1) */}
+              <div className="sm:col-span-2 border-t border-slate-800 pt-4 mt-2">
+                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block mb-1">
+                  {t('hardware_specs_title')}
+                </span>
+                <p className="text-[11px] text-slate-500 mb-3">{t('hardware_specs_hint')}</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_cpu')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Core i7 / Apple M1 / Snapdragon"
+                      value={hardwareSpecs.cpu || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, cpu: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_ram')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 16GB DDR4 / 8GB LPDDR5"
+                      value={hardwareSpecs.ram || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, ram: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_storage')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 512GB NVMe / 128GB"
+                      value={hardwareSpecs.storage || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, storage: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_gpu')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. RTX 3060 / Iris Xe"
+                      value={hardwareSpecs.gpu || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, gpu: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_os')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Windows 11 / iOS 17 / macOS"
+                      value={hardwareSpecs.os_version || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, os_version: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">{t('spec_battery_health')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 88% / Normal"
+                      value={hardwareSpecs.battery_health || ''}
+                      onChange={(e) => setHardwareSpecs({ ...hardwareSpecs, battery_health: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}

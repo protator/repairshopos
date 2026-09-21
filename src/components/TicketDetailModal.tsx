@@ -389,6 +389,53 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Structured Hardware Specs (PRD §4.1) */}
+                  {ticket.hardware_specs && Object.values(ticket.hardware_specs).some(Boolean) && (
+                    <div className="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl space-y-2.5">
+                      <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                        {t('hardware_specs_title')}
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                        {ticket.hardware_specs.cpu && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_cpu')}</span>
+                            <span className="text-slate-200 font-medium">{ticket.hardware_specs.cpu}</span>
+                          </div>
+                        )}
+                        {ticket.hardware_specs.ram && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_ram')}</span>
+                            <span className="text-slate-200 font-mono font-medium">{ticket.hardware_specs.ram}</span>
+                          </div>
+                        )}
+                        {ticket.hardware_specs.storage && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_storage')}</span>
+                            <span className="text-slate-200 font-mono font-medium">{ticket.hardware_specs.storage}</span>
+                          </div>
+                        )}
+                        {ticket.hardware_specs.gpu && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_gpu')}</span>
+                            <span className="text-slate-200 font-medium">{ticket.hardware_specs.gpu}</span>
+                          </div>
+                        )}
+                        {ticket.hardware_specs.os_version && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_os')}</span>
+                            <span className="text-slate-200 font-medium">{ticket.hardware_specs.os_version}</span>
+                          </div>
+                        )}
+                        {ticket.hardware_specs.battery_health && (
+                          <div>
+                            <span className="text-slate-500 block">{t('spec_battery_health')}</span>
+                            <span className="text-amber-300 font-mono font-medium">{ticket.hardware_specs.battery_health}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Pre-Repair Condition Checklist */}
                   <div className="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
